@@ -15,7 +15,7 @@ var stats;
 var gui, globalOptions, baseSpaceOptions, appliedRotation;
 var defaultRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1), Math.PI/2);
 var fiberResolution = 250;
-const maxFiberResolution = 500;
+var maxFiberResolution = 500;
 
 // Returns the fiber of a given base point under the Hopf map via a given resolution (i.e. resolution specifies the number of points on the fiber to compute)
 function hopfFiber1(basePoint, resolution) {

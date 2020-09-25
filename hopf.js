@@ -1,5 +1,3 @@
-"use strict";
-
 import * as THREE from './three.module.js';
 import { OrbitControls } from '/OrbitControls.js';
 import { LineMaterial } from './LineMaterial.js';
@@ -9,23 +7,23 @@ import { GUI } from './dat.gui.module.js';
 import Stats from './stats.module.js'
 
 
-let camera, orthCamera, controls, scene, orthScene, renderer;
-let baseSpace_geometry, baseSpace_material, baseSpace;
-let baseSpaceCircles = [];
-let compressToBall = true;
-let stats;
-let gui, globalOptions, baseSpaceOptions, appliedRotation;
-let defaultRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1), Math.PI/2);
-let fiberResolution = 250;
+var camera, orthCamera, controls, scene, orthScene, renderer;
+var baseSpace_geometry, baseSpace_material, baseSpace;
+var baseSpaceCircles = [];
+var compressToBall = true;
+var stats;
+var gui, globalOptions, baseSpaceOptions, appliedRotation;
+var defaultRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1), Math.PI/2);
+var fiberResolution = 250;
 const maxFiberResolution = 500;
 
 // Returns the fiber of a given base point under the Hopf map via a given resolution (i.e. resolution specifies the number of points on the fiber to compute)
 function hopfFiber1(basePoint, resolution) {
-    let r1 = new THREE.Quaternion(0, 1 + basePoint.x, basePoint.y, basePoint.z);
+    var r1 = new THREE.Quaternion(0, 1 + basePoint.x, basePoint.y, basePoint.z);
     r1.multiply(new THREE.Quaternion(1/Math.sqrt(2+2*basePoint.x),0,0,0));
-    let fiber = [];
-    for(let i = 0; i < resolution; i++) {
-        let pt = new THREE.Quaternion;
+    var fiber = [];
+    for(var i = 0; i < resolution; i++) {
+        var pt = new THREE.Quaternion;
         pt.multiplyQuaternions(r1, new THREE.Quaternion(Math.cos(2*Math.PI*i/resolution), Math.sin(2*Math.PI*i/resolution), 0, 0));
         fiber.push(pt);
     }
@@ -34,10 +32,10 @@ function hopfFiber1(basePoint, resolution) {
 
 // Stereographically prohjects a set of points in 4D space (given as Quaternions) from the north pole of the 3-sphere into 3-space
 function stereographicProjection(points) {
-    let proj = [];
-    for (let i = 0; i < points.length; i++) {
-    let denominator = Math.max(1 - points[i].x, 0.001);
-    let pt = new THREE.Vector3(points[i].y / denominator, points[i].z / denominator, points[i].w / denominator);
+    var proj = [];
+    for (var i = 0; i < points.length; i++) {
+    var denominator = Math.max(1 - points[i].x, 0.001);
+    var pt = new THREE.Vector3(points[i].y / denominator, points[i].z / denominator, points[i].w / denominator);
     proj[i] = pt;
     }
     if (!compressToBall)
@@ -47,10 +45,10 @@ function stereographicProjection(points) {
 
 // Continuous deformation of points in R^3 (given as an array of Vector3) to a unit ball
 function compressR3ToBall(points) {
-    for (let i = 0; i < points.length; i++) {
-        let dist = points[i].distanceTo(new THREE.Vector3(0,0,0));
-        //let scaling =1/(1+dist);
-        let scaling = (dist/Math.sqrt((1+dist*dist)))/dist;
+    for (var i = 0; i < points.length; i++) {
+        var dist = points[i].distanceTo(new THREE.Vector3(0,0,0));
+        //var scaling =1/(1+dist);
+        var scaling = (dist/Math.sqrt((1+dist*dist)))/dist;
         points[i].x = points[i].x*scaling;
         points[i].y = points[i].y*scaling;
         points[i].z = points[i].z*scaling;
@@ -62,7 +60,7 @@ function compressR3ToBall(points) {
 
 // reference: https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately
 function HSVtoRGB(h, s, v) {
-    let r, g, b, i, f, p, q, t;
+    var r, g, b, i, f, p, q, t;
     if (arguments.length === 1) {
         s = h.s, v = h.v, h = h.h;
     }
@@ -87,7 +85,7 @@ function HSVtoRGB(h, s, v) {
 }
 
 function rainbow(p, m) {
-    let rgb = HSVtoRGB(p/m*0.85, 1.0, 1.0);
+    var rgb = HSVtoRGB(p/m*0.85, 1.0, 1.0);
     return new THREE.Vector3(rgb.r,rgb.g,rgb.b);
 }
 
@@ -127,7 +125,7 @@ class baseSpaceCircle {
     }
 
     rotate() {
-        for (let vertex in this.base_geometry.vertices)
+        for (var vertex in this.base_geometry.vertices)
             this.base_geometry.vertices[vertex].applyQuaternion(this.appliedRotation_quaternion);
         this.base_geometry.verticesNeedUpdate = true;
     }
@@ -140,12 +138,12 @@ class baseSpaceCircle {
 
     // Recalculates the projected fiber vertex positions
     updateFiberProjections() {
-        for (let vertex in this.base_geometry.vertices) {
-            let projectedCirclePts = stereographicProjection(hopfFiber1(this.base_geometry.vertices[vertex], fiberResolution));
+        for (var vertex in this.base_geometry.vertices) {
+            var projectedCirclePts = stereographicProjection(hopfFiber1(this.base_geometry.vertices[vertex], fiberResolution));
             if (compressToBall)
                 projectedCirclePts = compressR3ToBall(projectedCirclePts);
-            let projectedCirclePts_ = [];
-            for (let i = 0; i < fiberResolution+1; i++)
+            var projectedCirclePts_ = [];
+            for (var i = 0; i < fiberResolution+1; i++)
                 projectedCirclePts_.push(projectedCirclePts[i].x, projectedCirclePts[i].y, projectedCirclePts[i].z);
             this.projectedCircles_objects[vertex].geometry.setPositions(projectedCirclePts_);
         }
@@ -155,7 +153,7 @@ class baseSpaceCircle {
         this.base_geometry.dispose();
         this.base_material.dispose();
         orthScene.remove(this.base_object);
-        for (let index in this.projectedCircles_objects) {
+        for (var index in this.projectedCircles_objects) {
             this.projectedCircles_geometries[index].dispose();
             this.projectedCircles_materials[index].dispose();
             scene.remove(this.projectedCircles_objects[index]);
@@ -176,10 +174,10 @@ class baseSpaceCircle {
         // Calculate the vertex positions and colors for a circle with y-distance=distanceToCenter
         this.distanceToCenter_radians = distanceToCenter*Math.PI/2;
         this.base_geometry = new THREE.Geometry();
-        for(let j = 0; j < pointCount; j++) {
-            let pt = this.pointCoordinate(j);
+        for(var j = 0; j < pointCount; j++) {
+            var pt = this.pointCoordinate(j);
             pt.applyQuaternion(defaultRotation);
-            let color = rainbow(j, pointCount);
+            var color = rainbow(j, pointCount);
             this.base_geometry.vertices.push(pt);
             this.base_geometry.colors.push(new THREE.Color(color.x/255,color.y/255,color.z/255));
         }
@@ -190,32 +188,32 @@ class baseSpaceCircle {
         orthScene.add(this.base_object);
 
         // For each new point on the base space, calculate the stereographically projected fiber under the Hopf map and add it to the scene
-        for (let vertex in this.base_geometry.vertices) {
+        for (var vertex in this.base_geometry.vertices) {
 
-            let projectedCirclePts = stereographicProjection(hopfFiber1(this.base_geometry.vertices[vertex], maxFiberResolution));
+            var projectedCirclePts = stereographicProjection(hopfFiber1(this.base_geometry.vertices[vertex], maxFiberResolution));
             if (compressToBall)
                 projectedCirclePts = compressR3ToBall(projectedCirclePts);
-            let projectedCirclePts_ = [];
-            for (let i = 0; i < maxFiberResolution+1; i++)
+            var projectedCirclePts_ = [];
+            for (var i = 0; i < maxFiberResolution+1; i++)
                 projectedCirclePts_.push(projectedCirclePts[i].x, projectedCirclePts[i].y, projectedCirclePts[i].z);
 
-            let colors = [];
-            for (let i = 0; i < maxFiberResolution+1; i++)
+            var colors = [];
+            for (var i = 0; i < maxFiberResolution+1; i++)
                 colors.push(this.base_geometry.colors[vertex].r, this.base_geometry.colors[vertex].g, this.base_geometry.colors[vertex].b);
 
-            let geomLine = new LineGeometry();
+            var geomLine = new LineGeometry();
             geomLine.setColors(colors);
             geomLine.setPositions(projectedCirclePts_);
             this.projectedCircles_geometries.push(geomLine);
 
-            let matLine = new LineMaterial( {
+            var matLine = new LineMaterial( {
                 color: 0xffffff,
                 linewidth: 0.003, // in pixels
                 vertexColors: true,
                 dashed: false
             } );
 
-            let line = new Line2(geomLine, matLine)
+            var line = new Line2(geomLine, matLine)
             line.computeLineDistances();
             line.scale.set( 1, 1, 1 );
 
@@ -241,23 +239,23 @@ function initGui() {
     gui = new GUI();
 
     globalOptions = gui.addFolder('Global Controls');
-    let param = {
+    var param = {
         'Fiber resolution': 250,
         'Map R3 to B3': true,
     };
     globalOptions.add( param, 'Fiber resolution', 10,500,10 ).onChange( function ( val ) {
         fiberResolution = val;
-        for (let index in baseSpaceCircles)
+        for (var index in baseSpaceCircles)
             baseSpaceCircles[index].updateFiberProjections();
     } );
     globalOptions.add( param, 'Map R3 to B3' ).onChange( function ( val ) {
         compressToBall = val;
-        for (let index in baseSpaceCircles)
+        for (var index in baseSpaceCircles)
             baseSpaceCircles[index].updateFiberProjections();
     } );
 
     baseSpaceOptions = gui.addFolder("Base Space Parametrization");
-    let paramBaseSpace = {
+    var paramBaseSpace = {
         'Center offset': 0,
         'Circumference': 2*Math.PI,
         'Point count': 10,
@@ -271,7 +269,7 @@ function initGui() {
             appliedRotation.__controllers.forEach(controller => controller.setValue(controller.initialValue));
           },
           'Clear all': function() {
-            for (let index in baseSpaceCircles)
+            for (var index in baseSpaceCircles)
             baseSpaceCircles[index].destroy();
             baseSpaceCircles = [];
             baseSpaceCircles.push(new baseSpaceCircle(0, Math.PI*2, 10, defaultRotation, new THREE.Vector3(0,0,0).normalize(), 0.0));
@@ -280,34 +278,34 @@ function initGui() {
           }
     }
     baseSpaceOptions.add( paramBaseSpace, 'Center offset', -1, 1, 0.0001).onChange( function(val) {
-        let index = baseSpaceCircles.length-1;
-        let pointCount = baseSpaceCircles[index].pointCount;
-        let defaultRotation = baseSpaceCircles[index].defaultRotation;
-        let circumference = baseSpaceCircles[index].circumference;
-        let appliedRotation_axis = baseSpaceCircles[index].appliedRotation_axis;
-        let appliedRotation_angle = baseSpaceCircles[index].appliedRotation_angle;
+        var index = baseSpaceCircles.length-1;
+        var pointCount = baseSpaceCircles[index].pointCount;
+        var defaultRotation = baseSpaceCircles[index].defaultRotation;
+        var circumference = baseSpaceCircles[index].circumference;
+        var appliedRotation_axis = baseSpaceCircles[index].appliedRotation_axis;
+        var appliedRotation_angle = baseSpaceCircles[index].appliedRotation_angle;
         baseSpaceCircles.pop().destroy();
         baseSpaceCircles.push(new baseSpaceCircle(val, circumference, pointCount, defaultRotation, appliedRotation_axis.normalize(), appliedRotation_angle));
     });
 
     baseSpaceOptions.add( paramBaseSpace, 'Circumference', 0, 2*Math.PI, 0.01).onChange( function(val) {
-        let index = baseSpaceCircles.length-1;
-        let pointCount = baseSpaceCircles[index].pointCount;
-        let defaultRotation = baseSpaceCircles[index].defaultRotation;
-        let distanceToCenter = baseSpaceCircles[index].distanceToCenter;
-        let appliedRotation_axis = baseSpaceCircles[index].appliedRotation_axis;
-        let appliedRotation_angle = baseSpaceCircles[index].appliedRotation_angle;
+        var index = baseSpaceCircles.length-1;
+        var pointCount = baseSpaceCircles[index].pointCount;
+        var defaultRotation = baseSpaceCircles[index].defaultRotation;
+        var distanceToCenter = baseSpaceCircles[index].distanceToCenter;
+        var appliedRotation_axis = baseSpaceCircles[index].appliedRotation_axis;
+        var appliedRotation_angle = baseSpaceCircles[index].appliedRotation_angle;
         baseSpaceCircles.pop().destroy();
         baseSpaceCircles.push(new baseSpaceCircle(distanceToCenter, val, pointCount, defaultRotation, appliedRotation_axis.normalize(), appliedRotation_angle));
     });
 
     baseSpaceOptions.add( paramBaseSpace, 'Point count', 1, 250, 1).onChange( function(val) {
-        let index = baseSpaceCircles.length-1;
-        let circumference = baseSpaceCircles[index].circumference;
-        let defaultRotation = baseSpaceCircles[index].defaultRotation;
-        let distanceToCenter = baseSpaceCircles[index].distanceToCenter;
-        let appliedRotation_axis = baseSpaceCircles[index].appliedRotation_axis;
-        let appliedRotation_angle = baseSpaceCircles[index].appliedRotation_angle;
+        var index = baseSpaceCircles.length-1;
+        var circumference = baseSpaceCircles[index].circumference;
+        var defaultRotation = baseSpaceCircles[index].defaultRotation;
+        var distanceToCenter = baseSpaceCircles[index].distanceToCenter;
+        var appliedRotation_axis = baseSpaceCircles[index].appliedRotation_axis;
+        var appliedRotation_angle = baseSpaceCircles[index].appliedRotation_angle;
         baseSpaceCircles.pop().destroy();
         baseSpaceCircles.push(new baseSpaceCircle(distanceToCenter, circumference, val, defaultRotation, appliedRotation_axis.normalize(), appliedRotation_angle));
     });
@@ -344,8 +342,8 @@ function init() {
     camera.lookAt(0,0,0);
 
     // Orthographic camera, to focus on the 2-sphere base space
-    let aspect = window.innerWidth / window.innerHeight;
-    let scale = 3;
+    var aspect = window.innerWidth / window.innerHeight;
+    var scale = 3;
     //orthCamera = new THREE.OrthographicCamera( window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 0.001, 1000);
     orthCamera = new THREE.OrthographicCamera(-aspect*scale, aspect*scale, 1*scale, -1*scale, 0.001, 1000);
     orthCamera.position.set(5,5,10);
@@ -391,8 +389,8 @@ function init() {
 
 function onWindowResize(){
     camera.aspect = window.innerWidth / window.innerHeight ;
-    let aspect = window.innerWidth / window.innerHeight;
-    let scale = 3;
+    var aspect = window.innerWidth / window.innerHeight;
+    var scale = 3;
     orthCamera.left = -aspect*scale;
     orthCamera.right = aspect*scale;
     orthCamera.top = 1*scale;
@@ -409,7 +407,7 @@ function animate() {
 
     stats.update();
 
-    for (let index in baseSpaceCircles) {
+    for (var index in baseSpaceCircles) {
         baseSpaceCircles[index].rotate();
         if (baseSpaceCircles[index].appliedRotation_angle > 0)
             baseSpaceCircles[index].updateFiberProjections();

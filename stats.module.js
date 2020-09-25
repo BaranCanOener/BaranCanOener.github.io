@@ -1,3 +1,5 @@
+"use strict";
+
 var Stats = function () {
 
 	var mode = 0;

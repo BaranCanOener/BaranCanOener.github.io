@@ -1,4 +1,6 @@
 
+"use strict";
+
 import { LineSegments2 } from "/LineSegments2.js";
 import { LineGeometry } from "/LineGeometry.js";
 import { LineMaterial } from "/LineMaterial.js";

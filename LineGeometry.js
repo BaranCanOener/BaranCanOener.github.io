@@ -1,3 +1,4 @@
+"use strict";
 
 import { LineSegmentsGeometry } from "/LineSegmentsGeometry.js";
 

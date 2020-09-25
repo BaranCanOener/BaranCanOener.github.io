@@ -1,3 +1,5 @@
+"use strict";
+
 import * as THREE from './three.module.js';
 import { OrbitControls } from '/OrbitControls.js';
 import { LineMaterial } from './LineMaterial.js';

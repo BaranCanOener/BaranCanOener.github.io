@@ -1,3 +1,5 @@
+"use strict";
+
 import {
 	Box3,
 	Float32BufferAttribute,

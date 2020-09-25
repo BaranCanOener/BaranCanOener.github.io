@@ -1,3 +1,5 @@
+"use strict";
+
 import * as THREE from './three.module.js';
 import { OrbitControls } from '/OrbitControls.js';
 import { LineMaterial } from './LineMaterial.js';
@@ -5,6 +7,7 @@ import { LineGeometry } from './LineGeometry.js';
 import { Line2 } from './Line2.js';
 import { GUI } from './dat.gui.module.js';
 import Stats from './stats.module.js'
+
 
 let camera, orthCamera, controls, scene, orthScene, renderer;
 let baseSpace_geometry, baseSpace_material, baseSpace;

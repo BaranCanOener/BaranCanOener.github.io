@@ -102,7 +102,7 @@ function rainbow(p, m) {
 class baseSpaceCircle {
 
     distanceToCenter;
-    #distanceToCenter_radians;
+    distanceToCenter_radians;
     circumference;
     pointCount;
     defaultRotation;

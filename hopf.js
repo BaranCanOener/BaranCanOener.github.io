@@ -141,18 +141,21 @@ class baseSpaceCircle {
     // Recalculates the projected fiber vertex positions
     updateFiberProjections() {
         for (var vertex in this.base_geometry.vertices) {
-            var projectedCirclePts = stereographicProjection(hopfFiber1(this.base_geometry.vertices[vertex], 250));
+            var projectedCirclePts = stereographicProjection(hopfFiber1(this.base_geometry.vertices[vertex], fiberResolution));
             if (compressToBall)
                 projectedCirclePts = compressR3ToBall(projectedCirclePts);
             var projectedCirclePts_ = [];
             for (var i = 0; i < fiberResolution+1; i++)
                 projectedCirclePts_.push(projectedCirclePts[i].x, projectedCirclePts[i].y, projectedCirclePts[i].z);
-            //this.projectedCircles_objects[vertex].geometry.setPositions(projectedCirclePts_);
-            var colors = [];
+            this.projectedCircles_objects[vertex].geometry.setPositions(projectedCirclePts_);
+            /*var colors = [];
             for (var i = 0; i < maxFiberResolution+1; i++)
                 colors.push(this.base_geometry.colors[vertex].r, this.base_geometry.colors[vertex].g, this.base_geometry.colors[vertex].b);
 
-            this.projectedCircles_objects[vertex].geometry.setColors(colors);
+            this.projectedCircles_objects[vertex].geometry.setColors(colors);*/
+            this.projectedCircles_objects[vertex].computeLineDistances();
+            this.projectedCircles_objects[vertex].scale.set( 1, 1, 1 );
+            this.projectedCircles_objects[vertex].geometry.attributes.position.needsUpdate = true;
             this.projectedCircles_objects[vertex].geometry.verticesNeedUpdate = true;
         }
     }
@@ -278,7 +281,7 @@ function initGui() {
     globalOptions.add( param, 'Map R3 to B3' ).onChange( function ( val ) {
         compressToBall = val;
 
-        var index = baseSpaceCircles.length-1;
+        /*var index = baseSpaceCircles.length-1;
         var pointCount = baseSpaceCircles[index].pointCount;
         var defaultRotation = baseSpaceCircles[index].defaultRotation;
         var distanceToCenter = baseSpaceCircles[index].distanceToCenter;
@@ -286,10 +289,10 @@ function initGui() {
         var appliedRotation_axis = baseSpaceCircles[index].appliedRotation_axis;
         var appliedRotation_angle = baseSpaceCircles[index].appliedRotation_angle;
         baseSpaceCircles.pop().destroy();
-        baseSpaceCircles.push(new baseSpaceCircle(distanceToCenter, circumference, pointCount, defaultRotation, appliedRotation_axis.normalize(), appliedRotation_angle));
+        baseSpaceCircles.push(new baseSpaceCircle(distanceToCenter, circumference, pointCount, defaultRotation, appliedRotation_axis.normalize(), appliedRotation_angle));*/
 
-        //for (var i in baseSpaceCircles)
-        //    baseSpaceCircles[i].updateFiberProjections();
+        for (var i in baseSpaceCircles)
+            baseSpaceCircles[i].updateFiberProjections();
         render();
     } );
     globalOptions.open();

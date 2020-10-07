@@ -101,7 +101,7 @@ function rainbow(p, m) {
 // O--------------------------------------------------------------------------------------------O
 class baseSpaceCircle {
 
-    distanceToCenter;
+    /*distanceToCenter;
     distanceToCenter_radians;
     circumference;
     pointCount;
@@ -116,7 +116,7 @@ class baseSpaceCircle {
 
     projectedCircles_geometries = [];
     projectedCircles_materials = [];
-    projectedCircles_objects = [];
+    projectedCircles_objects = [];*/
 
     /*  Base Space Parametrization
         Returns the coordinate of a point on the circle inside the base space, where 0 <= pointIndex < pointCount   */
@@ -164,7 +164,25 @@ class baseSpaceCircle {
     }
 
     constructor(distanceToCenter, circumference, pointCount, defaultRotation, appliedRotation_axis, appliedRotation_angle) {
+        //Declaration
+        this.distanceToCenter;
+        this.distanceToCenter_radians;
+        this.circumference;
+        this.pointCount;
+        this.defaultRotation;
+        this.appliedRotation_axis;
+        this.appliedRotation_angle;
+        this.appliedRotation_quaternion;
+    
+        this.base_geometry;
+        this.base_material;
+        this.base_object;
+    
+        this.projectedCircles_geometries = [];
+        this.projectedCircles_materials = [];
+        this.projectedCircles_objects = [];
 
+        //Initialization
         this.distanceToCenter = distanceToCenter;
         this.circumference = circumference;
         this.pointCount = pointCount;
@@ -255,6 +273,7 @@ function initGui() {
         for (var index in baseSpaceCircles)
             baseSpaceCircles[index].updateFiberProjections();
     } );
+    globalOptions.open();
 
     baseSpaceOptions = gui.addFolder("Base Space Parametrization");
     var paramBaseSpace = {
@@ -300,7 +319,6 @@ function initGui() {
         baseSpaceCircles.pop().destroy();
         baseSpaceCircles.push(new baseSpaceCircle(distanceToCenter, val, pointCount, defaultRotation, appliedRotation_axis.normalize(), appliedRotation_angle));
     });
-
     baseSpaceOptions.add( paramBaseSpace, 'Point count', 1, 250, 1).onChange( function(val) {
         var index = baseSpaceCircles.length-1;
         var circumference = baseSpaceCircles[index].circumference;
@@ -311,6 +329,7 @@ function initGui() {
         baseSpaceCircles.pop().destroy();
         baseSpaceCircles.push(new baseSpaceCircle(distanceToCenter, circumference, val, defaultRotation, appliedRotation_axis.normalize(), appliedRotation_angle));
     });
+    baseSpaceOptions.open();
 
     appliedRotation = baseSpaceOptions.addFolder('Applied Rotation Quaternion');
     appliedRotation.add( paramBaseSpace, 'X-component', 0.0, 1, 0.1).onChange( function(val) {
@@ -329,9 +348,9 @@ function initGui() {
         baseSpaceCircles[baseSpaceCircles.length-1].appliedRotation_angle = val;
         baseSpaceCircles[baseSpaceCircles.length-1].setAppliedRotation();
     });
-
     baseSpaceOptions.add(paramBaseSpace, 'Detach');
     baseSpaceOptions.add(paramBaseSpace, 'Clear all');
+    appliedRotation.open();
 }
 
 function init() {

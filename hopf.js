@@ -267,11 +267,13 @@ function initGui() {
         fiberResolution = val;
         for (var index in baseSpaceCircles)
             baseSpaceCircles[index].updateFiberProjections();
+        render();
     } );
     globalOptions.add( param, 'Map R3 to B3' ).onChange( function ( val ) {
         compressToBall = val;
         for (var index in baseSpaceCircles)
             baseSpaceCircles[index].updateFiberProjections();
+        render();
     } );
     globalOptions.open();
 
@@ -335,18 +337,22 @@ function initGui() {
     appliedRotation.add( paramBaseSpace, 'X-component', 0.0, 1, 0.1).onChange( function(val) {
         baseSpaceCircles[baseSpaceCircles.length-1].appliedRotation_axis.x = val;
         baseSpaceCircles[baseSpaceCircles.length-1].setAppliedRotation();
+        render();
     });
     appliedRotation.add( paramBaseSpace, 'Y-component', 0.0, 1, 0.1).onChange( function(val) {
         baseSpaceCircles[baseSpaceCircles.length-1].appliedRotation_axis.y = val;
         baseSpaceCircles[baseSpaceCircles.length-1].setAppliedRotation();
+        render();
     });
     appliedRotation.add( paramBaseSpace, 'Z-component', 0.0, 1, 0.1).onChange( function(val) {
         baseSpaceCircles[baseSpaceCircles.length-1].appliedRotation_axis.z = val;
         baseSpaceCircles[baseSpaceCircles.length-1].setAppliedRotation();
+        render();
     });
     appliedRotation.add( paramBaseSpace, 'Angle', 0.0, 0.1, 0.0001).onChange( function(val) {
         baseSpaceCircles[baseSpaceCircles.length-1].appliedRotation_angle = val;
         baseSpaceCircles[baseSpaceCircles.length-1].setAppliedRotation();
+        render();
     });
     baseSpaceOptions.add(paramBaseSpace, 'Detach');
     baseSpaceOptions.add(paramBaseSpace, 'Clear all');

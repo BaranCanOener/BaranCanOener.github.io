@@ -141,7 +141,7 @@ class baseSpaceCircle {
     // Recalculates the projected fiber vertex positions
     updateFiberProjections() {
         for (var vertex in this.base_geometry.vertices) {
-            var projectedCirclePts = stereographicProjection(hopfFiber1(this.base_geometry.vertices[vertex], fiberResolution));
+            var projectedCirclePts = stereographicProjection(hopfFiber1(this.base_geometry.vertices[vertex], 250));
             if (compressToBall)
                 projectedCirclePts = compressR3ToBall(projectedCirclePts);
             var projectedCirclePts_ = [];

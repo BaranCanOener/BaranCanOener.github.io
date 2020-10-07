@@ -148,6 +148,7 @@ class baseSpaceCircle {
             for (var i = 0; i < fiberResolution+1; i++)
                 projectedCirclePts_.push(projectedCirclePts[i].x, projectedCirclePts[i].y, projectedCirclePts[i].z);
             this.projectedCircles_objects[vertex].geometry.setPositions(projectedCirclePts_);
+            this.projectedCircles_objects[vertex].geometry.verticesNeedUpdate = true;
         }
     }
 

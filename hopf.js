@@ -270,7 +270,7 @@ function initGui() {
         render();
     } );
     globalOptions.add( param, 'Map R3 to B3' ).onChange( function ( val ) {
-        //compressToBall = val;
+        compressToBall = val;
 
         var index = baseSpaceCircles.length-1;
         var pointCount = baseSpaceCircles[index].pointCount;
@@ -282,8 +282,8 @@ function initGui() {
         baseSpaceCircles.pop().destroy();
         baseSpaceCircles.push(new baseSpaceCircle(distanceToCenter, circumference, pointCount, defaultRotation, appliedRotation_axis.normalize(), appliedRotation_angle));
 
-        for (var index in baseSpaceCircles)
-            baseSpaceCircles[index].updateFiberProjections();
+        for (var i in baseSpaceCircles)
+            baseSpaceCircles[i].updateFiberProjections();
         render();
     } );
     globalOptions.open();

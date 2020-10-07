@@ -282,8 +282,8 @@ function initGui() {
         baseSpaceCircles.pop().destroy();
         baseSpaceCircles.push(new baseSpaceCircle(distanceToCenter, circumference, pointCount, defaultRotation, appliedRotation_axis.normalize(), appliedRotation_angle));
 
-        for (var i in baseSpaceCircles)
-            baseSpaceCircles[i].updateFiberProjections();
+        //for (var i in baseSpaceCircles)
+        //    baseSpaceCircles[i].updateFiberProjections();
         render();
     } );
     globalOptions.open();

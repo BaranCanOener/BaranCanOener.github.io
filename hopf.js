@@ -12,14 +12,15 @@ import Stats from './stats.module.js'
 var camera, orthCamera, controls, scene, orthScene, renderer;
 var baseSpace_geometry, baseSpace_material, baseSpace;
 var baseSpaceCircles = [];
-var compressToBall = true;
+var compressToBall = false;
 var stats;
 var gui, globalOptions, baseSpaceOptions, appliedRotation;
 var defaultRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1), Math.PI/2);
 var fiberResolution = 250;
 var maxFiberResolution = 500;
+ 
 
-// Returns the fiber of a given base point under the Hopf map via a given resolution (i.e. resolution specifies the number of points on the fiber to compute)
+
 function hopfFiber1(basePoint, resolution) {
     var r1 = new THREE.Quaternion(0, 1 + basePoint.x, basePoint.y, basePoint.z);
     r1.multiply(new THREE.Quaternion(1/Math.sqrt(2+2*basePoint.x),0,0,0));
@@ -32,7 +33,10 @@ function hopfFiber1(basePoint, resolution) {
     return fiber;
 }
 
-// Stereographically prohjects a set of points in 4D space (given as Quaternions) from the north pole of the 3-sphere into 3-space
+// O--------------------------------------------------------------------------------------------O
+// | Stereographically prohjects a set of points in 4D space, given as Quaternions,             |
+// | from the north pole of the 3-sphere into 3-space                                           |
+// O--------------------------------------------------------------------------------------------O
 function stereographicProjection(points) {
     var proj = [];
     for (var i = 0; i < points.length; i++) {
@@ -45,7 +49,9 @@ function stereographicProjection(points) {
     return proj;
 }
 
-// Continuous deformation of points in R^3 (given as an array of Vector3) to a unit ball
+// O--------------------------------------------------------------------------------------------O
+// | Continuous deformation of points in R^3 (given as an array of Vector3) to a unit ball      |
+// O--------------------------------------------------------------------------------------------O
 function compressR3ToBall(points) {
     for (var i = 0; i < points.length; i++) {
         var dist = points[i].distanceTo(new THREE.Vector3(0,0,0));
@@ -101,7 +107,9 @@ function rainbow(p, m) {
 // O--------------------------------------------------------------------------------------------O
 class baseSpaceCircle {
 
-    /*distanceToCenter;
+    /* Class fields - for declaration, see constructor
+    
+    distanceToCenter;
     distanceToCenter_radians;
     circumference;
     pointCount;
@@ -125,24 +133,31 @@ class baseSpaceCircle {
     }
 
     rotate() {
-        for (var vertex in this.base_geometry.vertices)
-            this.base_geometry.vertices[vertex].applyQuaternion(this.appliedRotation_quaternion);
+        if ((this.appliedRotation_axis.x > 0.001) || (this.appliedRotation_axis.y > 0.001) || (this.appliedRotation_axis.z > 0.001))
+            for (var vertex in this.base_geometry.vertices)
+                this.base_geometry.vertices[vertex].applyQuaternion(this.appliedRotation_quaternion);
         this.base_geometry.verticesNeedUpdate = true;
     }
 
     setAppliedRotation() {
-        if ((this.appliedRotation_angle.x < 0.001) && (this.appliedRotation_angle.y < 0.001) && (this.appliedRotation_angle.z < 0.001))
-            baseSpaceCircles[index].appliedRotation_angle = 0;
         this.appliedRotation_quaternion = new THREE.Quaternion().setFromAxisAngle(this.appliedRotation_axis.normalize(), this.appliedRotation_angle);
     }
 
-    // Recalculates the projected fiber vertex positions
+
+    // Calculates the projected fiber vertex positions and adds the corresponding objects to the scene
     updateFiberProjections() {
-        for (var index in this.projectedCircles_objects) {
+        var circleCount = this.projectedCircles_geometries.length;
+        for (var index = 0; index < circleCount; index++)
+        {
             this.projectedCircles_geometries[index].dispose();
             this.projectedCircles_materials[index].dispose();
             scene.remove(this.projectedCircles_objects[index]);
         }
+        this.projectedCircles_objects = [];
+        this.projectedCircles_geometries = [];
+        this.projectedCircles_materials = [];
+
+        // For each new point on the base space, calculate the stereographically projected fiber under the Hopf map and add it to the scene
         for (var vertex in this.base_geometry.vertices) {
             var projectedCirclePts = stereographicProjection(hopfFiber1(this.base_geometry.vertices[vertex], fiberResolution));
             if (compressToBall)
@@ -158,7 +173,6 @@ class baseSpaceCircle {
             var geomLine = new LineGeometry();
             geomLine.setColors(colors);
             geomLine.setPositions(projectedCirclePts_);
-            this.projectedCircles_geometries.push(geomLine);
 
             var matLine = new LineMaterial( {
                 color: 0xffffff,
@@ -235,43 +249,8 @@ class baseSpaceCircle {
         this.base_object = new THREE.Points(this.base_geometry, this.base_material);
         orthScene.add(this.base_object);
 
-        // For each new point on the base space, calculate the stereographically projected fiber under the Hopf map and add it to the scene
-        for (var vertex in this.base_geometry.vertices) {
-
-            var projectedCirclePts = stereographicProjection(hopfFiber1(this.base_geometry.vertices[vertex], maxFiberResolution));
-            if (compressToBall)
-                projectedCirclePts = compressR3ToBall(projectedCirclePts);
-            var projectedCirclePts_ = [];
-            for (var i = 0; i < maxFiberResolution+1; i++)
-                projectedCirclePts_.push(projectedCirclePts[i].x, projectedCirclePts[i].y, projectedCirclePts[i].z);
-
-            var colors = [];
-            for (var i = 0; i < maxFiberResolution+1; i++)
-                colors.push(this.base_geometry.colors[vertex].r, this.base_geometry.colors[vertex].g, this.base_geometry.colors[vertex].b);
-
-            var geomLine = new LineGeometry();
-            geomLine.setColors(colors);
-            geomLine.setPositions(projectedCirclePts_);
-            this.projectedCircles_geometries.push(geomLine);
-
-            var matLine = new LineMaterial( {
-                color: 0xffffff,
-                linewidth: 0.003, // in pixels
-                vertexColors: true,
-                dashed: false
-            } );
-
-            var line = new Line2(geomLine, matLine);
-            line.computeLineDistances();
-            line.scale.set( 1, 1, 1 );
-
-            this.projectedCircles_materials.push(matLine);
-            this.projectedCircles_geometries.push(geomLine);
-            this.projectedCircles_objects.push(line);
-
-            scene.add(line);
-            render();
-        }
+        this.updateFiberProjections();
+        render();
 
     }
 }
@@ -289,7 +268,7 @@ function initGui() {
     globalOptions = gui.addFolder('Global Controls');
     var param = {
         'Fiber resolution': 250,
-        'Map R3 to B3': true,
+        'Map R3 to B3': false,
     };
     globalOptions.add( param, 'Fiber resolution', 10,500,10 ).onChange( function ( val ) {
         fiberResolution = val;
@@ -300,16 +279,6 @@ function initGui() {
     globalOptions.add( param, 'Map R3 to B3' ).onChange( function ( val ) {
         compressToBall = val;
 
-        /*var index = baseSpaceCircles.length-1;
-        var pointCount = baseSpaceCircles[index].pointCount;
-        var defaultRotation = baseSpaceCircles[index].defaultRotation;
-        var distanceToCenter = baseSpaceCircles[index].distanceToCenter;
-        var circumference = baseSpaceCircles[index].circumference;
-        var appliedRotation_axis = baseSpaceCircles[index].appliedRotation_axis;
-        var appliedRotation_angle = baseSpaceCircles[index].appliedRotation_angle;
-        baseSpaceCircles.pop().destroy();
-        baseSpaceCircles.push(new baseSpaceCircle(distanceToCenter, circumference, pointCount, defaultRotation, appliedRotation_axis.normalize(), appliedRotation_angle));*/
-
         for (var i in baseSpaceCircles)
             baseSpaceCircles[i].updateFiberProjections();
         render();
@@ -318,7 +287,7 @@ function initGui() {
 
     baseSpaceOptions = gui.addFolder("Base Space Parametrization");
     var paramBaseSpace = {
-        'Center offset': 0,
+        'Center offset': 0.3,
         'Circumference': 2*Math.PI,
         'Point count': 10,
         'X-component': 0.0,
@@ -332,14 +301,14 @@ function initGui() {
           },
           'Clear all': function() {
             for (var index in baseSpaceCircles)
-            baseSpaceCircles[index].destroy();
+                baseSpaceCircles[index].destroy();
             baseSpaceCircles = [];
             baseSpaceCircles.push(new baseSpaceCircle(0, Math.PI*2, 10, defaultRotation, new THREE.Vector3(0,0,0).normalize(), 0.0));
             baseSpaceOptions.__controllers.forEach(controller => controller.setValue(controller.initialValue));
             appliedRotation.__controllers.forEach(controller => controller.setValue(controller.initialValue));
           }
     }
-    baseSpaceOptions.add( paramBaseSpace, 'Center offset', -1, 1, 0.0001).onChange( function(val) {
+    baseSpaceOptions.add( paramBaseSpace, 'Center offset', -1, 0.999, 0.0001).onChange( function(val) {
         var index = baseSpaceCircles.length-1;
         var pointCount = baseSpaceCircles[index].pointCount;
         var defaultRotation = baseSpaceCircles[index].defaultRotation;
@@ -395,7 +364,6 @@ function initGui() {
     });
     baseSpaceOptions.add(paramBaseSpace, 'Detach');
     baseSpaceOptions.add(paramBaseSpace, 'Clear all');
-    appliedRotation.open();
 }
 
 function init() {
@@ -404,7 +372,7 @@ function init() {
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.001, 1000);
     camera.position.x = -3;
     camera.position.y = 0;
-    camera.position.z = 0;
+    camera.position.z = 2;
     camera.lookAt(0,0,0);
 
     // Orthographic camera, to focus on the 2-sphere base space
@@ -422,14 +390,20 @@ function init() {
     orthScene = new THREE.Scene();
 
     // Objects
-    baseSpace_geometry = new THREE.SphereGeometry(1,30,30);
-    baseSpace_material = new THREE.MeshBasicMaterial({color: 0xfafafa});
+    baseSpace_geometry = new THREE.SphereGeometry(1,32,32);
+    baseSpace_material = new THREE.MeshLambertMaterial({color: 0xffffff});
     baseSpace_material.transparent = true;
-    baseSpace_material.opacity = 0.5;
+    baseSpace_material.opacity = 0.8;
     baseSpace = new THREE.Mesh(baseSpace_geometry,baseSpace_material);
     baseSpace.position.x = 4.5;
     baseSpace.position.y = -1;
     orthScene.add(baseSpace);
+    var light = new THREE.PointLight( 0xffffff, 0.6, 0 );
+    light.position.set( 10, 0, 0 );
+    orthScene.add( light );
+    var light2 = new THREE.AmbientLight( 0x404040 );;
+    orthScene.add( light2 );
+
 
     // Renderer
     renderer = new THREE.WebGLRenderer({antialias: true});

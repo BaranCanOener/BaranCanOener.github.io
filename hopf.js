@@ -38,7 +38,7 @@ function hopfFiber1(basePoint, resolution) {
 }
 
 // O--------------------------------------------------------------------------------------------O
-// | Stereographically prohjects a set of points in 4D space, given as Quaternions,             |
+// | Stereographically projects a set of points in 4D space, given as Quaternions,             |
 // | from the north pole of the 3-sphere into 3-space                                           |
 // O--------------------------------------------------------------------------------------------O
 function stereographicProjection(points) {

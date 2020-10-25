@@ -269,6 +269,19 @@ function initGui() {
     var param = {
         'Fiber resolution': 250,
         'Map R3 to B3': false,
+        'Detach': function() {
+            baseSpaceCircles.push(new baseSpaceCircle(0, Math.PI*2, 10, defaultRotation, new THREE.Vector3(0,0,0).normalize(), 0.0));
+            baseSpaceOptions.__controllers.forEach(controller => controller.setValue(controller.initialValue));
+            appliedRotation.__controllers.forEach(controller => controller.setValue(controller.initialValue));
+          },
+          'Clear all': function() {
+            for (var index in baseSpaceCircles)
+                baseSpaceCircles[index].destroy();
+            baseSpaceCircles = [];
+            baseSpaceCircles.push(new baseSpaceCircle(0, Math.PI*2, 10, defaultRotation, new THREE.Vector3(0,0,0).normalize(), 0.0));
+            baseSpaceOptions.__controllers.forEach(controller => controller.setValue(controller.initialValue));
+            appliedRotation.__controllers.forEach(controller => controller.setValue(controller.initialValue));
+          }
     };
     globalOptions.add( param, 'Fiber resolution', 10,500,10 ).onChange( function ( val ) {
         fiberResolution = val;
@@ -283,7 +296,8 @@ function initGui() {
             baseSpaceCircles[i].updateFiberProjections();
         render();
     } );
-    globalOptions.open();
+    globalOptions.add(param, 'Detach');
+    globalOptions.add(param, 'Clear all');
 
     baseSpaceOptions = gui.addFolder("Base Space Parametrization");
     var paramBaseSpace = {
@@ -294,19 +308,6 @@ function initGui() {
         'Y-component': 0.0,
         'Z-component': 0.0,
         'Angle': 0.0,
-        'Detach': function() {
-            baseSpaceCircles.push(new baseSpaceCircle(0, Math.PI*2, 10, defaultRotation, new THREE.Vector3(0,0,0).normalize(), 0.0));
-            baseSpaceOptions.__controllers.forEach(controller => controller.setValue(controller.initialValue));
-            appliedRotation.__controllers.forEach(controller => controller.setValue(controller.initialValue));
-          },
-          'Clear all': function() {
-            for (var index in baseSpaceCircles)
-                baseSpaceCircles[index].destroy();
-            baseSpaceCircles = [];
-            baseSpaceCircles.push(new baseSpaceCircle(0, Math.PI*2, 10, defaultRotation, new THREE.Vector3(0,0,0).normalize(), 0.0));
-            baseSpaceOptions.__controllers.forEach(controller => controller.setValue(controller.initialValue));
-            appliedRotation.__controllers.forEach(controller => controller.setValue(controller.initialValue));
-          }
     }
     baseSpaceOptions.add( paramBaseSpace, 'Center offset', -1, 0.999, 0.0001).onChange( function(val) {
         var index = baseSpaceCircles.length-1;
@@ -362,8 +363,6 @@ function initGui() {
         baseSpaceCircles[baseSpaceCircles.length-1].setAppliedRotation();
         render();
     });
-    baseSpaceOptions.add(paramBaseSpace, 'Detach');
-    baseSpaceOptions.add(paramBaseSpace, 'Clear all');
 }
 
 function init() {

@@ -109,11 +109,9 @@ class baseSpaceCircle {
     appliedRotation_axis;
     appliedRotation_angle;
     appliedRotation_quaternion;
-
     base_geometry;
     base_material;
     base_object;
-
     projectedCircles_geometries = [];
     projectedCircles_materials = [];
     projectedCircles_objects = [];*/
@@ -140,6 +138,11 @@ class baseSpaceCircle {
 
     // Recalculates the projected fiber vertex positions
     updateFiberProjections() {
+        for (var index in this.projectedCircles_objects) {
+            this.projectedCircles_geometries[index].dispose();
+            this.projectedCircles_materials[index].dispose();
+            scene.remove(this.projectedCircles_objects[index]);
+        }
         for (var vertex in this.base_geometry.vertices) {
             var projectedCirclePts = stereographicProjection(hopfFiber1(this.base_geometry.vertices[vertex], fiberResolution));
             if (compressToBall)
@@ -147,12 +150,32 @@ class baseSpaceCircle {
             var projectedCirclePts_ = [];
             for (var i = 0; i < fiberResolution+1; i++)
                 projectedCirclePts_.push(projectedCirclePts[i].x, projectedCirclePts[i].y, projectedCirclePts[i].z);
-            this.projectedCircles_objects[vertex].geometry.setPositions(projectedCirclePts_);
 
             var colors = [];
             for (var i = 0; i < maxFiberResolution+1; i++)
                 colors.push(this.base_geometry.colors[vertex].r, this.base_geometry.colors[vertex].g, this.base_geometry.colors[vertex].b);
-            this.projectedCircles_objects[vertex].geometry.setColors(colors);
+
+            var geomLine = new LineGeometry();
+            geomLine.setColors(colors);
+            geomLine.setPositions(projectedCirclePts_);
+            this.projectedCircles_geometries.push(geomLine);
+
+            var matLine = new LineMaterial( {
+                color: 0xffffff,
+                linewidth: 0.003, // in pixels
+                vertexColors: true,
+                dashed: false
+            } );
+
+            var line = new Line2(geomLine, matLine);
+            line.computeLineDistances();
+            line.scale.set( 1, 1, 1 );
+
+            this.projectedCircles_materials.push(matLine);
+            this.projectedCircles_geometries.push(geomLine);
+            this.projectedCircles_objects.push(line);
+
+            scene.add(line);
         }
     }
 

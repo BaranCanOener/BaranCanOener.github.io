@@ -148,15 +148,11 @@ class baseSpaceCircle {
             for (var i = 0; i < fiberResolution+1; i++)
                 projectedCirclePts_.push(projectedCirclePts[i].x, projectedCirclePts[i].y, projectedCirclePts[i].z);
             this.projectedCircles_objects[vertex].geometry.setPositions(projectedCirclePts_);
-            /*var colors = [];
+
+            var colors = [];
             for (var i = 0; i < maxFiberResolution+1; i++)
                 colors.push(this.base_geometry.colors[vertex].r, this.base_geometry.colors[vertex].g, this.base_geometry.colors[vertex].b);
-
-            this.projectedCircles_objects[vertex].geometry.setColors(colors);*/
-            this.projectedCircles_objects[vertex].computeLineDistances();
-            this.projectedCircles_objects[vertex].scale.set( 1, 1, 1 );
-            this.projectedCircles_objects[vertex].geometry.attributes.position.needsUpdate = true;
-            this.projectedCircles_objects[vertex].geometry.verticesNeedUpdate = true;
+            this.projectedCircles_objects[vertex].geometry.setColors(colors);
         }
     }
 
@@ -242,7 +238,7 @@ class baseSpaceCircle {
                 dashed: false
             } );
 
-            var line = new Line2(geomLine, matLine)
+            var line = new Line2(geomLine, matLine);
             line.computeLineDistances();
             line.scale.set( 1, 1, 1 );
 

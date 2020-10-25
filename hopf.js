@@ -19,8 +19,12 @@ var defaultRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(
 var fiberResolution = 250;
 var maxFiberResolution = 500;
  
-
-
+// O--------------------------------------------------------------------------------------------O
+// | Computes a fiber of a point in 3-space under the Hopf map                                  |
+// | basePoint is a Vector3; resolution is an integer controlling the amount of points on the   |
+// | circle fiber to compute.                                                                   |
+// | The function returns a list of quaternions                                                 |
+// O--------------------------------------------------------------------------------------------O
 function hopfFiber1(basePoint, resolution) {
     var r1 = new THREE.Quaternion(0, 1 + basePoint.x, basePoint.y, basePoint.z);
     r1.multiply(new THREE.Quaternion(1/Math.sqrt(2+2*basePoint.x),0,0,0));

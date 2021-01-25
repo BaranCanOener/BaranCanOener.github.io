@@ -36,7 +36,6 @@
 
         //The SVG element to be read
         //Source: https://www.kisscc0.com/clipart/owl-public-domain-copyright-free-cartoon-owl-with-rta3op/
-        var svgElement = document.getElementById("picture");
 
         function sliderCoeffOnChange(val) {
                 document.getElementById('coeffInput').value=val; 
@@ -54,6 +53,7 @@
     <script src="fourier.js"></script>
     <script src="sketch.js"></script>
     <script>
+        var svgElement = document.getElementById("picture");
         var svgDoc = svgElement.contentDocument;
         var svgelem = svgDoc.documentElement; // reference to the SVG element
         paths = [];

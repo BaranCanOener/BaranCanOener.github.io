@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body { margin: 0; }
+    </style>
+    <title>Fourier Series</title>
+</head>
+<body>
+    <b>Fourier Series</b>
+    <div class="fourierCoeffSlideContainer">
+        <p>Fourier Coefficients:</p>
+        <input type="range" min="1" max="100" value="40" step="2" class="slider" id="coeffSlider" onchange="sliderCoeffOnChange(this.value);">
+        <input type="text" style="width:25px" id="coeffInput" value="40">
+    </div>
+    <div class="parallelCountSlideContainer">
+        <p>SVG Paths to draw in parallel:</p>
+        <input type="range" min="1" max="100" value="2" step="1" class="slider" id="parallelSlider" onchange="sliderParallelOnChange(this.value);">
+        <input type="text" style="width:25px" id="parallelInput" value="2">
+    </div>
+    <p> </p>
+    <button style="width:200px" onclick="buttonOnClick()">Draw</button>
+    <br></br>
+    <object data="picture.svg" type="image/svg+xml"
+    id="picture" width="0%" height="0%"></object>
+
+    <script>
+        //Declaration of p5 instance
+        var canvas;
+
+        //Declaration of the paths to be drawn
+        //array of arrays: Each element contains a single path, where the path is stored as [x1,y1,x2,y2, ....]
+        var paths;
+
+        //The SVG element to be read
+        //Source: https://www.kisscc0.com/clipart/owl-public-domain-copyright-free-cartoon-owl-with-rta3op/
+        var svgElement = document.getElementById("picture");
+
+        function sliderCoeffOnChange(val) {
+                document.getElementById('coeffInput').value=val; 
+        }
+        function sliderParallelOnChange(val) {
+                document.getElementById('parallelInput').value=val; 
+        }
+        function buttonOnClick() {
+            canvas.reset(parseInt(document.getElementById('coeffInput').value), parseInt(document.getElementById('parallelInput').value));
+        }
+    </script>
+    <script src="pathProcessing.js"></script>  
+    <script src="p5.min.js"></script>
+    <script src="complex.js"></script>
+    <script src="fourier.js"></script>
+    <script src="sketch.js"></script>
+    <script>
+        var svgDoc = svgElement.contentDocument;
+        var svgelem = svgDoc.documentElement; // reference to the SVG element
+        paths = [];
+        var q1 = svgDoc.querySelectorAll("path");
+        paths = getPaths(q1, 600, 600);
+        canvas = buildCanvas();
+    </script>
+</body>
+</html>

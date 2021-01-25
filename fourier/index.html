@@ -44,6 +44,13 @@
                 document.getElementById('parallelInput').value=val; 
         }
         function buttonOnClick() {
+            var svgElement = document.getElementById("picture");
+            var svgDoc = svgElement.contentDocument;
+            var svgelem = svgDoc.documentElement; // reference to the SVG element
+            paths = [];
+            var q1 = svgDoc.querySelectorAll("path");
+            paths = getPaths(q1, 600, 600);
+            canvas = buildCanvas();
             canvas.reset(parseInt(document.getElementById('coeffInput').value), parseInt(document.getElementById('parallelInput').value));
         }
     </script>
@@ -53,13 +60,7 @@
     <script src="fourier.js"></script>
     <script src="sketch.js"></script>
     <script>
-        var svgElement = document.getElementById("picture");
-        var svgDoc = svgElement.contentDocument;
-        var svgelem = svgDoc.documentElement; // reference to the SVG element
-        paths = [];
-        var q1 = svgDoc.querySelectorAll("path");
-        paths = getPaths(q1, 600, 600);
-        canvas = buildCanvas();
+
     </script>
 </body>
 </html>
